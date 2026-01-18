@@ -587,11 +587,11 @@
             opacity: 1;
         }
         .ball.flying {
-            transition: left 0.6s cubic-bezier(0.2, 0.6, 0.3, 1),
-                        top 0.6s cubic-bezier(0.2, 0.6, 0.3, 1),
-                        transform 0.6s ease-out,
+            transition: left 0.7s cubic-bezier(0.25, 0.1, 0.25, 1),
+                        top 0.7s cubic-bezier(0.08, 0.6, 0.3, 1),
+                        transform 0.7s ease-out,
                         opacity 0.2s;
-            transform: scale(0.65);
+            transform: scale(0.55) rotate(720deg);
         }
         .ball.at-striker {
             animation: ballPulse 0.4s ease-in-out;
@@ -606,8 +606,8 @@
             position: absolute;
             bottom: 20px;
             right: 20px;
-            width: 220px;
-            height: 165px;
+            width: 320px;
+            height: 180px;
             background: #000;
             border: 4px solid #00ff00;
             overflow: hidden;
@@ -618,8 +618,9 @@
         .camera-box video {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
             transform: scaleX(-1);
+            background: #000;
         }
 
         .pose-label {
@@ -715,27 +716,36 @@
             margin-top: 15px;
         }
 
-        /* Chaos announcement */
+        /* Chaos announcement - styled like result popup */
         .chaos-announce {
             position: fixed;
-            top: 30%;
+            top: 35%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0.5);
             text-align: center;
             z-index: 85;
             opacity: 0;
             pointer-events: none;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .chaos-announce.show {
             opacity: 1;
             transform: translate(-50%, -50%) scale(1);
         }
-        .chaos-text {
-            font-size: 36px;
-            color: #ff00ff;
-            text-shadow: 0 0 30px #ff00ff;
+        .chaos-main {
+            font-size: 48px;
+            margin-bottom: 10px;
         }
+        .chaos-sub {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        /* Chaos type colors */
+        .chaos-main.reversed { color: #ff00ff; text-shadow: 0 0 40px #ff00ff; }
+        .chaos-main.blind { color: #888888; text-shadow: 0 0 40px #444444; }
+        .chaos-main.fakeout { color: #ffaa00; text-shadow: 0 0 40px #ffaa00; }
+        .chaos-main.pressure { color: #ff3333; text-shadow: 0 0 40px #ff3333; }
+        .chaos-main.normal { color: #00ff00; text-shadow: 0 0 40px #00ff00; }
 
         /* Screen shake */
         @keyframes screenShake {
@@ -777,33 +787,40 @@
             100% { opacity: 0; }
         }
 
-        /* Persistent REVERSED indicator - shaky and annoying */
+        /* Persistent REVERSED indicator - large and flashy like popups */
         .reversed-indicator {
             position: fixed;
-            top: 80px;
+            top: 75px;
             left: 50%;
-            transform: translateX(-50%);
-            padding: 10px 30px;
+            transform: translateX(-50%) scale(0.8);
+            padding: 12px 40px;
             font-family: 'Press Start 2P', monospace;
-            font-size: 14px;
+            font-size: 24px;
             color: #ff00ff;
-            background: rgba(255, 0, 255, 0.15);
-            border: 3px solid #ff00ff;
+            text-shadow: 0 0 30px #ff00ff, 0 0 60px #ff00ff;
+            background: rgba(0, 0, 0, 0.6);
+            border: none;
+            border-radius: 8px;
             z-index: 50;
-            display: none;
-            animation: shakyShake 0.1s infinite;
-            text-shadow: 0 0 10px #ff00ff;
-            box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: nonepulseGlow 1.5s ease-in-out infinite;
         }
         .reversed-indicator.show {
-            display: block;
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+            animation: pulseGlow 1.5s ease-in-out infinite;
         }
-
-        @keyframes shakyShake {
-            0%, 100% { transform: translateX(-50%) rotate(-1deg); }
-            25% { transform: translateX(-48%) rotate(1deg); }
-            50% { transform: translateX(-52%) rotate(-0.5deg); }
-            75% { transform: translateX(-50%) rotate(0.5deg); }
+        @keyframes pulseGlow {
+            0%, 100% {
+                text-shadow: 0 0 30px #ff00ff, 0 0 60px #ff00ff;
+                transform: translateX(-50%) scale(1);
+            }
+            50% {
+                text-shadow: 0 0 40px #ff00ff, 0 0 80px #ff00ff, 0 0 100px #ff00ff;
+                transform: translateX(-50%) scale(1.02);
+            }
         }
 
 
@@ -947,7 +964,7 @@
                     <div class="info-title" style="color: #ff00ff; border-color: rgba(255, 0, 255, 0.3);">CHAOS MODE</div>
                     <div class="tip-list">
                         <strong>REVERSED</strong> - left is right. good luck.<br>
-                        <strong>BLIND</strong> - can't see where you're covering.<br>
+                        <strong>BLIND</strong> - blink and you'll miss it.<br>
                         <strong>FAKEOUT</strong> - shows wrong zone first.<br>
                         <strong>PRESSURE</strong> - 2 shots. rapid fire. survive.
                     </div>
@@ -1088,12 +1105,13 @@
     </div>
 
     <div class="chaos-announce" id="chaos-announce">
-        <div class="chaos-text" id="chaos-text">REVERSE!</div>
+        <div class="chaos-main" id="chaos-main">REVERSE!</div>
+        <div class="chaos-sub" id="chaos-sub"></div>
     </div>
 
     <!-- Persistent reversed indicator -->
     <div class="reversed-indicator" id="reversed-indicator">
-        ⚠️ REVERSED ⚠️
+        REVERSED
     </div>
 
     <div class="flash-overlay" id="flash-overlay"></div>
@@ -1221,8 +1239,8 @@
 
             camera = new Camera($('webcam'), {
                 onFrame: async () => await pose.send({ image: $('webcam') }),
-                width: 640,
-                height: 480
+                width: 1280,
+                height: 720
             });
             await camera.start();
         }
@@ -1466,8 +1484,8 @@
                 return;
             }
 
-            // Maybe trigger chaos - starts after 2 shots, then every 3 shots
-            if (state.totalShots >= 2 && state.totalShots % 3 === 2) {
+            // Maybe trigger chaos - starts after 2 shots, then every 2 shots
+            if (state.playerShots >= 2 && state.playerShots % 2 === 0) {
                 await maybeChaos();
             }
 
@@ -1522,8 +1540,13 @@
                 await sleep(t(100));
             }
 
-            // Show target zone - UNLESS BLIND MODE (pure luck shot)
-            if (!isBlind) {
+            // Show target zone
+            // BLIND MODE: Brief flash then hide (fairer - you get a glimpse)
+            if (isBlind) {
+                $(`zone-${target}`).classList.add('target');
+                await sleep(250); // Brief glimpse
+                $(`zone-${target}`).classList.remove('target');
+            } else {
                 $(`zone-${target}`).classList.add('target');
             }
 
@@ -1561,14 +1584,19 @@
 
             // Ball flies smoothly to target zone
             ball.classList.remove('at-striker');
+
+            // CRITICAL: Reset inline transition so CSS class can take over
+            ball.style.transition = '';
+            ball.offsetHeight; // Force reflow
+
             ball.classList.add('flying');
             ball.style.left = (zoneRect.left + zoneRect.width / 2 - 22) + 'px';
             ball.style.top = (zoneRect.top + zoneRect.height / 2 - 22) + 'px';
 
-            await sleep(t(250));
+            await sleep(t(350));
             striker.classList.remove('kick');
 
-            await sleep(t(300));
+            await sleep(t(400));
 
             // Check result
             const saved = state.zone === target;
@@ -1634,29 +1662,29 @@
         async function maybeChaos() {
             const roll = Math.random();
 
-            if (roll < 0.25) {
-                // REVERSED - controls flip, show persistent indicator
+            if (roll < 0.20) {
+                // REVERSED - 20% - controls flip, show persistent indicator
                 state.reversed = !state.reversed;
                 updateReversedIndicator();
                 if (state.reversed) {
-                    await showChaosLong('REVERSED!', 'left ↔ right');
+                    await showChaosLong('REVERSED', 'left ↔ right', 'reversed');
                 } else {
-                    await showChaosLong('NORMAL', 'controls restored');
+                    await showChaosLong('NORMAL', 'controls restored', 'normal');
                 }
-            } else if (roll < 0.40) {
-                // BLIND - ~15% chance, no target indicator at all
+            } else if (roll < 0.35) {
+                // BLIND - 15% - brief flash then hidden
                 state.blindMode = true;
-                await showChaosLong('BLIND!', 'pure luck');
+                await showChaosLong('BLIND', 'blink and you miss it', 'blind');
             } else if (roll < 0.60) {
-                // FAKEOUT - show wrong zone first
+                // FAKEOUT - 25% - show wrong zone first
                 state.fakeoutShot = true;
-                await showChaosLong('FAKEOUT!', 'watch the switch');
-            } else if (roll < 0.80) {
-                // PRESSURE - 2 rapid shots
+                await showChaosLong('FAKEOUT', 'watch the switch', 'fakeout');
+            } else if (roll < 0.90) {
+                // PRESSURE - 30% - 2 rapid shots
                 state.pressureShot = true;
-                await showChaosLong('PRESSURE!', 'brace yourself');
+                await showChaosLong('PRESSURE', 'brace yourself', 'pressure');
             }
-            // 20% chance nothing happens
+            // 10% chance nothing happens
         }
 
         // Persistent shaky indicator when reversed
@@ -1669,22 +1697,26 @@
             }
         }
 
-        async function showChaosLong(text, subtext) {
-            $('chaos-text').textContent = text;
+        async function showChaosLong(text, subtext, type = 'reversed') {
+            const main = $('chaos-main');
+            main.textContent = text;
+            main.className = 'chaos-main ' + type;
+            $('chaos-sub').textContent = subtext || '';
             $('chaos-announce').classList.add('show');
 
-            await sleep(500);
-            $('chaos-text').textContent = subtext || text;
-            await sleep(1000);
+            await sleep(1200);
 
             $('chaos-announce').classList.remove('show');
             await sleep(200);
         }
 
-        function showChaos(text) {
-            $('chaos-text').textContent = text;
+        function showChaos(text, type = 'pressure') {
+            const main = $('chaos-main');
+            main.textContent = text;
+            main.className = 'chaos-main ' + type;
+            $('chaos-sub').textContent = '';
             $('chaos-announce').classList.add('show');
-            setTimeout(() => $('chaos-announce').classList.remove('show'), 1000);
+            setTimeout(() => $('chaos-announce').classList.remove('show'), 800);
         }
 
         // ============ EFFECTS ============
